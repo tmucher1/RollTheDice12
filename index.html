@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rolling Dice and Coin Flip</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #dice {
+      font-size: 36px;
+      border: 2px solid #000;
+      width: 350px;
+      height: 350px;
+      line-height: 350px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 20px;
+      cursor: pointer;
+    }
+    #dice-text {
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #coin {
+      font-size: 36px;
+      border: 2px solid #000;
+      width: 200px;
+      height: 200px;
+      line-height: 200px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 20px;
+      cursor: pointer;
+    }
+    #coin-text {
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #leaderboard {
+      margin-top: 20px;
+    }
+    #money-leaderboard {
+      margin-top: 20px;
+    }
+    #money {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    #bet-input {
+      margin-top: 10px;
+    }
+    #bet-btn {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #bet-result {
+      margin-top: 10px;
+    }
+    #name-input {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rolling Dice and Coin Flip</h1>
+  <div id="dice" onclick="rollDice()">
+    <span id="dice-text">Click to Roll</span>
+  </div>
+  <p id="result"></p>
+  <div id="leaderboard">
+    <h2>Leaderboard - Highest Rolled Number</h2>
+    <p id="highestNumber">None</p>
+  </div>
+  <div id="money">Money: 0</div>
+  <input type="number" id="bet-input" placeholder="Enter your bet">
+  <button id="bet-btn" onclick="betOnCoinFlip()">Bet on Coin Flip</button>
+  <p id="bet-result"></p>
+  <div id="money-leaderboard">
+    <h2>Leaderboard - Top Money Earners</h2>
+    <ol id="topMoneyEarners">
+      <li>None</li>
+    </ol>
+  </div>
+
+  <script>
+    let highestRolledNumber = 0;
+    let money = parseInt(localStorage.getItem('money')) || 0;
+    let playerName = localStorage.getItem('playerName') || '';
+
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function rollDice() {
+      const dice = document.getElementById('dice');
+      const resultElement = document.getElementById('result');
+
+      // Change the range here for different dice types
+      const minNumber = 1;
+      const maxNumber = 100000;
+
+      const randomNumber = getRandomNumber(minNumber, maxNumber);
+
+      dice.textContent = randomNumber;
+      resultElement.textContent = `You rolled: ${randomNumber}`;
+
+      // Earn one money every time you roll the dice
+      money++;
+      localStorage.setItem('money', money);
+      updateMoney();
+
+      if (randomNumber > highestRolledNumber) {
+        highestRolledNumber = randomNumber;
+        updateLeaderboard();
+      }
+    }
+
+    function flipCoin() {
+      const coin = document.getElementById('coin');
+      const resultElement = document.getElementById('result');
+
+      const randomCoinSide = getRandomNumber(0, 1);
+      const coinSide = randomCoinSide === 0 ? 'Heads' : 'Tails';
+
+      coin.textContent = coinSide;
+      resultElement.textContent = `You flipped: ${coinSide}`;
+    }
+
+    function updateLeaderboard() {
+      const highestNumberElement = document.getElementById('highestNumber');
+      highestNumberElement.textContent = highestRolledNumber;
+    }
+
+    function updateMoney() {
+      const moneyElement = document.getElementById('money');
+      moneyElement.textContent = `Money: ${money}`;
+    }
+
+    function betOnCoinFlip() {
+      const nameInput = document.getElementById('name-input');
+      const betInput = document.getElementById('bet-input');
+
+      playerName = nameInput.value;
+      localStorage.setItem('playerName', playerName);
+
+      const betAmount = parseInt(betInput.value);
+
+      if (isNaN(betAmount) || betAmount <= 0) {
+        alert('Please enter a valid bet amount greater than zero.');
+        return;
+      }
+
+      if (betAmount > money) {
+        alert('You do not have enough money to place that bet.');
+        return;
+      }
+
+      const randomCoinSide = getRandomNumber(0, 1);
+      const coinSide = randomCoinSide === 0 ? 'Heads' : 'Tails';
+
+      const betResultElement = document.getElementById('bet-result');
+      if (coinSide === 'Heads') {
+        betResultElement.textContent = `You won ${betAmount} money!`;
+        money += betAmount;
+      } else {
+        betResultElement.textContent = `You lost ${betAmount} money.`;
+        money -= betAmount;
+      }
+
+      localStorage.setItem('money', money);
+      updateMoney();
+    }
+    // Initial leaderboard and top money earners update
+    updateLeaderboard();
+    updateMoney();
+  </script>
+</body>
+</html>
+
